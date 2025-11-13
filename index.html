@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suno Music Generator</title>
+  <style>
+    body { font-family: sans-serif; background: #f7f8fc; color: #222; display: flex; justify-content: center; padding: 20px; }
+    .box { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 450px; box-shadow: 0 0 20px #ddd; }
+    input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #6c63ff; color: white; padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #5548ff; }
+    audio { width: 100%; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🎶 Suno Generator</h2>
+    <label>Judul lagu</label>
+    <input id="title" placeholder="Contoh: Senja" />
+    <label>Gaya Musik</label>
+    <input id="tags" placeholder="reggae, female vocal" />
+    <label>Lirik (opsional)</label>
+    <textarea id="lyrics" rows="4" placeholder="Tulis 2 bait lirik..."></textarea>
+    <label>Model</label>
+    <select id="model">
+      <option value="v5">V5</option>
+      <option value="v4.5">V4.5</option>
+      <option value="v4">V4</option>
+    </select>
+    <label><input type="checkbox" id="instrumental" /> Instrumental</label>
+    <button onclick="generateSong()">Generate Lagu</button>
+    <p id="status"></p>
+    <audio id="audio" controls hidden></audio>
+  </div>
+
+  <script>
+    async function generateSong() {
+      const title = document.getElementById('title').value;
+      const tags = document.getElementById('tags').value;
+      const lyrics = document.getElementById('lyrics').value;
+      const model = document.getElementById('model').value;
+      const instrumental = document.getElementById('instrumental').checked;
+      const status = document.getElementById('status');
+      const audio = document.getElementById('audio');
+      audio.hidden = true;
+      status.textContent = "⏳ Membuat lagu...";
+
+      const response = await fetch("/api/suno", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, tags, lyrics, model, instrumental })
+      });
+
+      const data = await response.json();
+      if (data.error) {
+        status.textContent = "❌ Error: " + data.error;
+        return;
+      }
+
+      status.textContent = "✅ Lagu selesai! Putar di bawah 👇";
+      audio.src = data.audio_url;
+      audio.hidden = false;
+    }
+  </script>
+</body>
+      </html>
